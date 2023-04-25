@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
             .addOnFailureListener {
                 // Failure message
             }
-        val cinemaEB = listOf(movie1, movie2)
+         val cinemaEB = listOf(movie1, movie2)
         database.child("users").child(user1).child("MovieList").setValue(cinemaEB)
 
         val user2 = "Sarina"
@@ -59,17 +59,19 @@ class MainActivity : AppCompatActivity() {
         val databaseRef = database.child("users").child(user1).child("MovieList")
         val movieListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val movies = dataSnapshot.getValue<List<Movie>>()
+                val movies = dataSnapshot.getValue<List<Movie>>()?.filterNotNull()
                 Log.i("MoviesRetrieved", movies.toString())
                 if (movies != null) {
                     // show in recyclerView
                     generateRecyclerView(movies)
+                } else {
+                    Log.i("NoMoviesToRetrieve", "Eish, no movies!")
+                    // update the UI in some way to show no movies to show
                 }
             }
             override fun onCancelled(databaseError: DatabaseError) {
-                // Failure message
+                Log.i("MoviesRetrievalError", databaseError.toString())
             }
-
         }
         databaseRef.addValueEventListener(movieListener)
 
@@ -77,6 +79,7 @@ class MainActivity : AppCompatActivity() {
         database.child("users").child(user1).child("Preferences").get()
             .addOnSuccessListener {
                 Log.i("PreferencesRetrieved", it.value.toString())
+                // Deserialize to a UserPreferences object
             }
             .addOnFailureListener {
                 // Failure message
